@@ -1,0 +1,125 @@
+/* DermScan 스타일시트 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f8f9fa;
+}
+.navbar {
+    background-color: #3a5a78;
+}
+.navbar-brand {
+    font-weight: bold;
+    color: white !important;
+}
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+.nav-link:hover {
+    color: white !important;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+.card-header {
+    background-color: #3a5a78;
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: bold;
+}
+.btn-primary {
+    background-color: #3a5a78;
+    border-color: #3a5a78;
+}
+.btn-primary:hover {
+    background-color: #2c4760;
+    border-color: #2c4760;
+}
+.upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+.upload-area:hover {
+    border-color: #3a5a78;
+    background-color: #f1f3f5;
+}
+.upload-area.highlight {
+    border-color: #3a5a78;
+    background-color: #e9ecef;
+}
+.result-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+.diagnosis-item {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #3a5a78;
+}
+.diagnosis-item.top {
+    background-color: #e9f2fa;
+    border-left: 4px solid #0d6efd;
+}
+.progress-bar {
+    background-color: #3a5a78;
+}
+.tab-content {
+    padding: 20px;
+    background-color: white;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.nav-tabs .nav-link {
+    color: #495057;
+}
+.nav-tabs .nav-link.active {
+    color: #3a5a78;
+    font-weight: bold;
+}
+#loadingSpinner {
+    display: none;
+}
+.model-info-section {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+.model-info-title {
+    font-weight: bold;
+    color: #3a5a78;
+    margin-bottom: 10px;
+}
+.model-metric {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.model-metric-name {
+    font-weight: 500;
+}
+.model-metric-value {
+    font-weight: bold;
+}
+.footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #3a5a78;
+    color: white;
+    text-align: center;
+}

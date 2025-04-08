@@ -1,0 +1,7 @@
+flask
+pillow
+transformers
+tensorflow
+tf-keras
+torch
+accelerate
