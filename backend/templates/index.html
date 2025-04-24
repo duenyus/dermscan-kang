@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DermScan - 피부 병변 분석 서비스</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -13,38 +12,6 @@
             color: #333;
         }
         
-        /* 크로퍼 관련 스타일 */
-        .cropper-container {
-            margin: 0 auto;
-            background-color: #f8f9fa;
-            overflow: hidden;
-            max-width: 100%;
-        }
-        .image-crop-container {
-            position: relative;
-            max-width: 100%;
-            height: 450px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-        }
-        #cropImage {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-        }
-        .cropper-view-box {
-            outline: none; /* 크롭 영역의 외곽선 제거 */
-        }
-        .cropper-modal {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        .crop-controls {
-            margin-top: 15px;
-            margin-bottom: 15px;
-        }
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -163,7 +130,6 @@
             <div class="text-center">
                 <div class="btn-group">
                     <button class="btn btn-primary" id="analyze-btn" disabled>분석하기</button>
-                    <button class="btn btn-outline-primary" id="recrop-btn" disabled>다시 크롭하기</button>
                 </div>
             </div>
         </div>
@@ -224,60 +190,7 @@
         </div>
     </div>
 
-    <!-- 이미지 크롭 모달 -->
-    <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-fullscreen-md-down">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cropModalLabel">병변 선택 - 병변 영역만 선택해주세요 (피부:병변 비율 - 5:5 ~ 4:6)</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="image-crop-container">
-                        <img id="cropImage" src="" alt="크롭할 이미지">
-                    </div>
-                    <div class="crop-controls p-3">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="aspectRatio" class="form-label">비율 선택</label>
-                                <select id="aspectRatio" class="form-select">
-                                    <option value="NaN">자유 비율</option>
-                                    <option value="1" selected>1:1 (정사각형)</option>
-                                    <option value="1.33333">4:3 (일반 사진)</option>
-                                    <option value="1.77777">16:9 (와이드)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mt-4 text-center">
-                                    <button id="rotateLeft" class="btn btn-outline-secondary mx-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
-                                            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
-                                        </svg>
-                                        90° 왼쪽
-                                    </button>
-                                    <button id="rotateRight" class="btn btn-outline-secondary mx-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                                        </svg>
-                                        90° 오른쪽
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary" id="cropApply">적용하기</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const uploadArea = document.getElementById('upload-area');
@@ -363,167 +276,6 @@
                 handleFiles(this.files);
             });
 
-            // 이미지 크롭 관련 변수
-            let cropper = null;
-            const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
-            const cropImage = document.getElementById('cropImage');
-            const cropApplyBtn = document.getElementById('cropApply');
-            const aspectRatioSelect = document.getElementById('aspectRatio');
-            const rotateLeftBtn = document.getElementById('rotateLeft');
-            const rotateRightBtn = document.getElementById('rotateRight');
-            const recropBtn = document.getElementById('recrop-btn');
-            
-            // 크롭 관련 데이터 저장 변수
-            let originalImageUrl = null; // 원본 이미지 URL 저장
-            let croppedImageData = null;
-            
-            // 크롭 모달 이벤트 처리
-            document.getElementById('cropModal').addEventListener('shown.bs.modal', function() {
-                // 모달이 완전히 표시된 후 크롭 영역 조정
-                if (cropper) {
-                    cropper.resize();
-                }
-            });
-            
-            aspectRatioSelect.addEventListener('change', function() {
-                const ratio = parseFloat(this.value);
-                
-                if (cropper) {
-                    cropper.setAspectRatio(ratio);
-                }
-            });
-            
-            rotateLeftBtn.addEventListener('click', function() {
-                if (cropper) {
-                    cropper.rotate(-90);
-                }
-            });
-            
-            rotateRightBtn.addEventListener('click', function() {
-                if (cropper) {
-                    cropper.rotate(90);
-                }
-            });
-            
-            cropApplyBtn.addEventListener('click', function() {
-                if (cropper) {
-                    // 크롭된 이미지 데이터 가져오기
-                    const canvas = cropper.getCroppedCanvas({
-                        maxWidth: 1920,
-                        maxHeight: 1920,
-                        fillColor: '#fff'
-                    });
-                    
-                    if (canvas) {
-                        // 크롭된 이미지 데이터 저장
-                        canvas.toBlob(function(blob) {
-                            // 파일 형식에 맞게 확장자 설정
-                            let fileExtension = 'jpg';
-                            if (selectedFile && selectedFile.type === 'image/png') {
-                                fileExtension = 'png';
-                            }
-                            
-                            // 새 파일 객체 생성
-                            const now = new Date();
-                            const timestamp = now.getFullYear() + 
-                                ('0' + (now.getMonth() + 1)).slice(-2) + 
-                                ('0' + now.getDate()).slice(-2) + '_' +
-                                ('0' + now.getHours()).slice(-2) + 
-                                ('0' + now.getMinutes()).slice(-2) + 
-                                ('0' + now.getSeconds()).slice(-2);
-                            
-                            const croppedFileName = `cropped_image_${timestamp}.${fileExtension}`;
-                            const croppedFile = new File([blob], croppedFileName, {
-                                type: selectedFile ? selectedFile.type : 'image/jpeg'
-                            });
-                            
-                            // 선택된 파일을 크롭된 파일로 교체
-                            selectedFile = croppedFile;
-                            
-                            // 미리보기 업데이트
-                            const imageUrl = URL.createObjectURL(blob);
-                            updatePreview(imageUrl);
-                            
-                            // 모달 닫기
-                            cropModal.hide();
-                            
-                            // 분석 버튼 활성화
-                            analyzeBtn.disabled = false;
-                            resultContainer.style.display = 'none';
-                        }, selectedFile ? selectedFile.type : 'image/jpeg');
-                    }
-                }
-            });
-            
-            // 크롭 모달 닫힐 때 리소스 정리
-            document.getElementById('cropModal').addEventListener('hidden.bs.modal', function() {
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-            });
-            
-            // 이미지 미리보기 업데이트 함수
-            function updatePreview(imageUrl) {
-                const img = document.createElement('img');
-                img.src = imageUrl;
-                img.className = 'preview-image';
-                
-                // 기존 미리보기 제거
-                const existingPreview = uploadArea.querySelector('.preview-image');
-                if (existingPreview) {
-                    existingPreview.remove();
-                }
-                
-                // 새 미리보기 추가
-                uploadArea.innerHTML = '';
-                uploadArea.appendChild(img);
-                
-                // 분석 버튼과 다시 크롭하기 버튼 활성화
-                analyzeBtn.disabled = false;
-                recropBtn.disabled = false;
-                resultContainer.style.display = 'none';
-            }
-            
-            // 크롭 모달 열기 함수
-            function openCropModal(imageUrl) {
-                // 크롭 이미지 설정
-                cropImage.src = imageUrl;
-                
-                // 모달 표시
-                cropModal.show();
-                
-                // 이미지 로드 후 cropper 초기화
-                cropImage.onload = function() {
-                    // 이전 cropper 인스턴스 제거
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    
-                    // 약간의 지연 후 cropper 초기화 (모달 트랜지션 완료 후)
-                    setTimeout(() => {
-                        cropper = new Cropper(cropImage, {
-                            aspectRatio: parseFloat(aspectRatioSelect.value),
-                            viewMode: 1,
-                            dragMode: 'move',
-                            autoCropArea: 0.9,
-                            restore: false,
-                            guides: true,
-                            center: true,
-                            highlight: false,
-                            cropBoxMovable: true,
-                            cropBoxResizable: true,
-                            toggleDragModeOnDblclick: false,
-                            minContainerWidth: 300,
-                            minContainerHeight: 300,
-                            responsive: true,
-                            checkOrientation: true,
-                            background: false
-                        });
-                    }, 300);
-                };
-            }
-            
             function handleFiles(files) {
                 if (files.length > 0) {
                     selectedFile = files[0];
@@ -550,7 +302,6 @@
                             `clipboard_image_${timestamp}.${extension}`, 
                             {type: selectedFile.type}
                         );
-                        console.log("이름이 생성된 클립보드 이미지:", selectedFile.name);
                     }
                     
                     // 파일 유효성 검사
@@ -565,32 +316,31 @@
                         return;
                     }
 
-                    // 이미지 미리보기 생성 후 크롭 모달 열기
+                    // 이미지 미리보기 생성
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        // 원본 이미지 URL 저장
-                        originalImageUrl = e.target.result;
-                        // 크롭 모달 열기
-                        openCropModal(originalImageUrl);
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-image';
+                        
+                        // 기존 미리보기 제거
+                        const existingPreview = uploadArea.querySelector('.preview-image');
+                        if (existingPreview) {
+                            existingPreview.remove();
+                        }
+                        
+                        // 새 미리보기 추가
+                        uploadArea.innerHTML = '';
+                        uploadArea.appendChild(img);
+                        
+                        // 분석 버튼 활성화
+                        analyzeBtn.disabled = false;
+                        resultContainer.style.display = 'none';
                     };
                     reader.readAsDataURL(selectedFile);
                 }
             }
 
-            // 다시 크롭하기 버튼 클릭 이벤트
-            recropBtn.addEventListener('click', function() {
-                // 원본 이미지가 있으면 그것을 사용하고, 없으면 현재 이미지 사용
-                if (originalImageUrl) {
-                    openCropModal(originalImageUrl);
-                } else {
-                    // 미리보기 이미지가 있는 경우 그 이미지를 사용
-                    const previewImg = uploadArea.querySelector('.preview-image');
-                    if (previewImg) {
-                        openCropModal(previewImg.src);
-                    }
-                }
-            });
-            
             // 분석 버튼 클릭 이벤트
             analyzeBtn.addEventListener('click', analyzeImage);
 

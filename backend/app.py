@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, url_for, redirect
+from flask import Flask, request, jsonify, render_template, url_for, redirect, send_from_directory
 import os
 import numpy as np
 from PIL import Image
@@ -11,7 +11,7 @@ import re
 import sqlite3
 from datetime import datetime
 
-from backend.models.swin_model import SwinModel
+from models.swin_model import SwinModel
 from models.vi_model import ViModel
 
 # 로깅 설정
@@ -73,7 +73,7 @@ def init_db():
 init_db()
 
 # 업로드 폴더 설정
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'images')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB 제한
@@ -229,7 +229,7 @@ def analyze_image():
 
             # 결과 반환
             result = {
-                'image_url': url_for('static', filename=f'uploads/{unique_filename}', _external=True),
+                'image_url': url_for('serve_image', filename=unique_filename, _external=True),
                 'description': description,
                 'diagnoses': diagnoses,
                 'model_used': model_type
@@ -239,7 +239,7 @@ def analyze_image():
             try:
                 # IP 주소 추출
                 ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-                image_path = url_for('static', filename=f'uploads/{unique_filename}', _external=True)
+                image_path = url_for('serve_image', filename=unique_filename, _external=True)
                 diagnoses_json = json.dumps(diagnoses)
                 
                 # 데이터베이스에 저장
@@ -757,6 +757,12 @@ def delete_feedback():
     except Exception as e:
         logger.error(f"피드백 삭제 처리 중 예외 발생: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+
+# 이미지 파일 제공 라우트
+@app.route('/images/<filename>')
+def serve_image(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == '__main__':

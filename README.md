@@ -1,89 +1,93 @@
-# DermScan 사용 설명서
+# DermScan (No Crop Version)
 
-## 소개
+피부 병변 이미지를 분석하여 병변을 설명하고 가능성 있는 진단명을 제시하는 웹 애플리케이션입니다.
+이 버전은 이미지 크롭 기능이 제거된 버전으로, 업로드된 이미지를 그대로 분석합니다.
 
-DermScan은 피부 병변 이미지를 분석하여 병변을 설명하고 가능성 있는 진단명을 제시하는 웹 애플리케이션입니다. 이 문서는 DermScan의 설치, 실행 및 사용 방법에 대한 안내를 제공합니다.
+## 주요 기능
+
+- 이미지 업로드 및 분석
+- 두 가지 AI 모델 지원 (ViT, Swin Transformer)
+- 병변 설명 생성
+- 가능성 있는 진단명 제시
+- 분석 결과에 대한 피드백 시스템
+- 관리자 페이지 (통계 및 로그 확인)
 
 ## 시스템 요구사항
 
-- Python 3.9.x (텐서플로우 안정 버전)
+- Python 3.9 이상
 - 웹 브라우저 (Chrome, Firefox, Safari 등)
 - 최소 4GB RAM
 - 인터넷 연결
 
 ## 설치 방법
 
-1. 프로젝트 파일을 다운로드하거나 클론합니다.
-2. 필요한 Python 패키지를 설치합니다:
+1. 프로젝트 클론:
+```bash
+git clone https://github.com/[username]/dermscan_nocrop.git
+cd dermscan_nocrop
+```
 
+2. 가상환경 생성 및 활성화:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+.\venv\Scripts\activate   # Windows
+```
+
+3. 필요한 패키지 설치:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## 실행 방법
 
-1. 터미널 또는 명령 프롬프트를 열고 프로젝트 디렉토리로 이동합니다.
-2. 백엔드 서버를 실행합니다:
-
+1. 백엔드 서버 실행:
 ```bash
 cd backend
 python app.py
 ```
 
-3. 웹 브라우저를 열고 다음 주소로 접속합니다: `http://localhost:5000`
-
-## 사용 방법
-
-1. 메인 페이지에서 "이미지 업로드" 영역을 클릭하거나 이미지를 드래그 앤 드롭합니다.
-2. 지원되는 이미지 형식은 JPG, JPEG, PNG이며 최대 16MB까지 업로드할 수 있습니다.
-3. 이미지가 업로드되면 "분석하기" 버튼을 클릭합니다.
-4. 분석이 완료되면 다음 정보가 표시됩니다:
-   - 업로드한 이미지
-   - 병변 설명
-   - 가능성 있는 진단명 2개 (확률과 함께 표시)
-5. "새 이미지 분석하기" 버튼을 클릭하여 다른 이미지를 분석할 수 있습니다.
-
-## 주의사항
-
-- DermScan은 의학적 조언을 대체하지 않습니다. 정확한 진단은 의사와 상담하세요.
-- 분석 결과는 참고용으로만 사용하세요.
-- 개인정보 보호를 위해 업로드된 이미지는 분석 후 서버에서 자동으로 삭제됩니다.
+2. 웹 브라우저에서 접속:
+```
+http://localhost:5000
+```
 
 ## 프로젝트 구조
 
 ```
-dermscan/
+dermscan_nocrop/
 ├── backend/
 │   ├── app.py                 # 백엔드 서버 코드
 │   ├── models/
-│   │   └── dermscan_model.py  # 이미지 분석 모델
+│   │   ├── swin_model.py     # Swin Transformer 모델
+│   │   └── vi_model.py       # ViT 모델
 │   ├── static/
-│   │   └── uploads/           # 업로드된 이미지 저장 폴더
+│   │   └── images/           # 업로드된 이미지 저장 폴더
 │   └── templates/
-│       └── index.html         # 프론트엔드 템플릿
-├── data/                      # 데이터 저장 폴더
-└── models/                    # 학습된 모델 저장 폴더
+│       ├── index.html        # 메인 페이지
+│       ├── admin.html        # 관리자 페이지
+│       └── 404.html          # 404 에러 페이지
+└── requirements.txt          # 프로젝트 의존성
 ```
 
-## 기술 스택
+## API 엔드포인트
 
-- 백엔드: Flask, TensorFlow, NumPy, Pillow
-- 프론트엔드: HTML, CSS, JavaScript, Bootstrap
-- 이미지 분석: EfficientNet 기반 딥러닝 모델
+- `POST /api/analyze`: 이미지 분석
+- `POST /api/feedback`: 피드백 저장
+- `GET /api/admin/feedback`: 피드백 목록 조회
+- `GET /api/admin/statistics`: 피드백 통계
+- `GET /api/admin/analysis-log`: 분석 로그 조회
+- `GET /api/admin/analysis-log/statistics`: 분석 로그 통계
+- `POST /api/admin/analysis-log/delete`: 분석 로그 삭제
+- `POST /api/admin/feedback/delete`: 피드백 삭제
 
-## 문제 해결
+## 주의사항
 
-- **서버 실행 오류**: 포트 5000이 이미 사용 중인 경우, 다른 포트를 사용하여 서버를 실행하세요:
-  ```bash
-  python app.py --port 5001
-  ```
-  그런 다음 `http://localhost:5001`로 접속하세요.
+- 이 애플리케이션은 의학적 조언을 대체하지 않습니다.
+- 정확한 진단은 반드시 의사와 상담하세요.
+- 분석 결과는 참고용으로만 사용하세요.
+- 개인정보 보호를 위해 업로드된 이미지는 분석 후 서버에서 자동으로 삭제됩니다.
 
-- **이미지 업로드 오류**: 지원되는 형식(JPG, JPEG, PNG)인지 확인하고 파일 크기가 16MB 이하인지 확인하세요.
+## 라이선스
 
-- **분석 오류**: 이미지가 선명하고 병변이 잘 보이는지 확인하세요. 조명이 적절하고 초점이 맞는 이미지를 사용하는 것이 좋습니다.
-
-## 연락처
-
-문제가 발생하거나 추가 정보가 필요한 경우 개발자에게 문의하세요.
-# test
+이 프로젝트는 비공개(Private) 프로젝트입니다. 무단 복제 및 배포를 금지합니다.

@@ -1,10 +1,66 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Project specific
+backend/static/images/*
+!backend/static/images/.gitkeep
+backend/dermscan.db
+*.log
+.DS_Store
+
+# Model files
+*.h5
+*.pth
+*.onnx
+*.pb
+*.tflite
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Test files
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
 
 # Distribution / packaging
 .Python
@@ -70,9 +126,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
 # IPython
 profile_default/
 ipython_config.py
@@ -110,17 +163,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# virtual environments
-venv/
-ENV/
-env/
-.venv/
-
 # upload
 backend/static/uploads
-
-# log
-backend/*.log
 
 # Mac index
 .DS_Store
