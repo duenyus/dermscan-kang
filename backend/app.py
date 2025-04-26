@@ -227,26 +227,30 @@ def analyze_image():
 
             # ChatGPT 응답 파싱
             try:
-                # 응답을 설명과 진단으로 분리
-                gpt_lines = gpt_response.split('\n')
-                gpt_description = gpt_lines[0] if len(gpt_lines) > 0 else ""
+                # GPT 응답 파싱
+                sections = gpt_response.split('\n\n')
+                
+                # 특징 추출
+                gpt_description = ""
+                if sections[0].startswith('1. 특징:'):
+                    gpt_description = sections[0].split(':', 1)[1].strip()
 
-                # 진단 추출 (3개의 진단 찾기)
+                # 진단 추출
                 gpt_diagnoses = []
-                confidence_levels = [0.85, 0.75, 0.65]  # 더 현실적인 확률 분포
-
-                for i, line in enumerate(gpt_lines[1:]):
-                    if line.startswith(('1.', '2.', '3.')):
-                        diagnosis = line.split('.', 1)[1].strip()
-                        if ':' in diagnosis:
-                            diag_name, diag_desc = diagnosis.split(':', 1)
-                            gpt_diagnoses.append({
-                                "diagnosis": diag_name.strip(),
-                                "description": diag_desc.strip(),
-                                "probability": confidence_levels[len(gpt_diagnoses)] if len(gpt_diagnoses) < len(confidence_levels) else 0.5
-                            })
-                        if len(gpt_diagnoses) >= 3:
-                            break
+                if len(sections) > 1 and '가능성 있는 진단:' in sections[1]:
+                    diagnoses_text = sections[1].split('\n')[1:]  # Skip the header
+                    confidence_levels = [0.85, 0.75, 0.65]
+                    
+                    for i, line in enumerate(diagnoses_text):
+                        if line.startswith('-'):
+                            parts = line[1:].strip().split(':', 1)
+                            if len(parts) == 2:
+                                diagnosis, description = parts
+                                gpt_diagnoses.append({
+                                    "diagnosis": diagnosis.strip(),
+                                    "description": description.strip(),
+                                    "probability": confidence_levels[i] if i < len(confidence_levels) else 0.5
+                                })
 
                 logger.info(f"파싱된 GPT 진단 결과: {gpt_diagnoses}")
 

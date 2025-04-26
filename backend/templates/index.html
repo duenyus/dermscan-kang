@@ -155,26 +155,22 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="analysis-section">
-                        <h4>AI 모델 분석</h4>
                         <div class="mb-4">
+                            <h4>AI 모델 분석</h4>
                             <h5>병변 설명</h5>
-                            <p id="description"></p>
-                        </div>
-                        <div>
-                            <h5>가능성 있는 진단</h5>
+                            <p id="description" class="p-3 bg-light rounded"></p>
+                            <h5 class="mt-3">가능성 있는 진단</h5>
                             <div id="diagnoses-container"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="analysis-section">
-                        <h4>ChatGPT 분석</h4>
-                        <div class="mb-4">
+                        <div class="mt-4">
+                            <h4>GPT 분석</h4>
                             <h5>병변 설명</h5>
-                            <p id="gpt-description"></p>
-                        </div>
-                        <div>
-                            <h5>가능성 있는 진단</h5>
+                            <p id="gpt-description" class="p-3 bg-light rounded"></p>
+                            <h5 class="mt-3">가능성 있는 진단</h5>
                             <div id="gpt-diagnoses-container"></div>
                         </div>
                     </div>
@@ -439,44 +435,50 @@
                 });
             }
 
+            function createDiagnosisItem(item) {
+                const diagnosisItem = document.createElement('div');
+                diagnosisItem.className = 'diagnosis-item mb-3 p-3 bg-light rounded';
+                diagnosisItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>${item.diagnosis}</strong>
+                        ${item.probability ? `<span class="badge bg-primary">${Math.round(item.probability * 100)}%</span>` : ''}
+                    </div>
+                    ${item.description ? `<p class="mt-2 mb-0 text-muted">${item.description}</p>` : ''}
+                `;
+                return diagnosisItem;
+            }
+
+
             function displayResults(data) {
                 // 이미지 설정
                 resultImage.src = data.image_url;
 
-                // 병변 설명 설정
+                // AI 모델 분석 결과 설정
                 description.textContent = data.description;
-                gptDescription.textContent = "ChatGPT 분석 결과는 여기에 표시됩니다."; // 임시 placeholder
-
-                // 진단 결과 설정
                 diagnosesContainer.innerHTML = '';
                 data.diagnoses.forEach(item => {
-                    const diagnosisItem = document.createElement('div');
-                    diagnosisItem.className = 'diagnosis-item';
-
-                    const diagnosisName = document.createElement('div');
-                    diagnosisName.textContent = item.diagnosis;
-
-                    const diagnosisProbability = document.createElement('div');
-                    const probability = Math.round(item.probability * 100);
-                    diagnosisProbability.textContent = `${probability}%`;
-
-                    const progressContainer = document.createElement('div');
-                    progressContainer.style.width = '100%';
-                    progressContainer.style.marginTop = '5px';
-
-                    const progressBar = document.createElement('div');
-                    progressBar.className = 'progress-bar';
-                    progressBar.style.width = `${probability}%`;
-
-                    progressContainer.appendChild(progressBar);
-
-                    diagnosisItem.appendChild(diagnosisName);
-                    diagnosisItem.appendChild(diagnosisProbability);
-                    diagnosisItem.appendChild(progressContainer);
-
+                    const diagnosisItem = createDiagnosisItem(item);
                     diagnosesContainer.appendChild(diagnosisItem);
                 });
-                gptDiagnosesContainer.innerHTML = "ChatGPT 진단 결과는 여기에 표시됩니다."; // 임시 placeholder
+
+                // GPT 분석 결과 설정
+                gptDescription.textContent = data.gpt_description || "분석 결과를 불러오는 중...";
+                gptDiagnosesContainer.innerHTML = '';
+                if (data.gpt_diagnoses && data.gpt_diagnoses.length > 0) {
+                    data.gpt_diagnoses.forEach(item => {
+                        const diagnosisItem = document.createElement('div');
+                        diagnosisItem.className = 'diagnosis-item mb-3 p-3 bg-light rounded';
+                        diagnosisItem.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>${item.diagnosis}</strong>
+                                ${item.probability ? `<span class="badge bg-primary">${Math.round(item.probability * 100)}%</span>` : ''}
+                            </div>
+                            ${item.description ? `<p class="mt-2 mb-0 text-muted">${item.description}</p>` : ''}
+                        `;
+                        gptDiagnosesContainer.appendChild(diagnosisItem);
+                    });
+                }
+
 
                 // 피드백 상태 초기화
                 document.getElementById('feedback-message').style.display = 'none';
@@ -572,7 +574,7 @@
                 uploadArea.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up mb-3" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2z"/>
-                        <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.1884.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+                        <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.9423.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
                     </svg>
                     <p>이미지를 여기에 끌어다 놓거나 클릭하여 파일을 선택하세요</p>
                     <p class="text-muted small">지원 형식: JPG, JPEG, PNG (최대 16MB)</p>
