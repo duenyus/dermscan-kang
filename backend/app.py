@@ -164,13 +164,14 @@ def analyze_image():
         file.save(file_path)
 
         try:
-            # 이미지 분석 로직
-            model = models.get(default_model)
+            # 사용자가 선택한 모델 사용
+            selected_model = request.form.get('model', 'swin')
+            model = models.get(selected_model)
             if not model:
-                return jsonify({'error': 'No model available'}), 500
+                return jsonify({'error': 'Selected model not available'}), 500
 
             # 이미지 전처리 및 분석
-            model = models.get(default_model)
+            model = models.get(selected_model)
             if not model:
                 return jsonify({'error': 'No model available'}), 500
 
