@@ -5,3 +5,8 @@ tensorflow
 tf-keras
 torch
 accelerate
+flask
+numpy
+pillow
+tensorflow
+werkzeug
