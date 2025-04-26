@@ -25,14 +25,22 @@ OPENAI_API_KEY = getenv('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
 
-# OpenAI API 키 유효성 검사
+# OpenAI API 키 유효성 검사 및 사용 가능한 모델 확인
 try:
     client = OpenAI(api_key=OPENAI_API_KEY)
     models = client.models.list()
     logger.info("✅ OpenAI API 키가 유효합니다.")
+
+    # 사용 가능한 모델 목록 출력
+    logger.info("=== 사용 가능한 OpenAI 모델 목록 ===")
+    for model in models:
+        logger.info(f"모델: {model.id}")
+    logger.info("================================")
+
 except Exception as e:
     logger.error(f"❌ OpenAI API 키 오류: {str(e)}")
     raise ValueError("OpenAI API 키가 유효하지 않거나 권한이 없습니다.")
+
 
 # OpenAI API 키를 환경 변수에서 가져오기
 from os import getenv
@@ -40,11 +48,18 @@ OPENAI_API_KEY = getenv('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
 
-# OpenAI API 키 유효성 검사
+# OpenAI API 키 유효성 검사 및 사용 가능한 모델 확인
 try:
     client = OpenAI(api_key=OPENAI_API_KEY)
     models = client.models.list()
     logger.info("✅ OpenAI API 키가 유효합니다.")
+
+    # 사용 가능한 모델 목록 출력
+    logger.info("=== 사용 가능한 OpenAI 모델 목록 ===")
+    for model in models:
+        logger.info(f"모델: {model.id}")
+    logger.info("================================")
+
 except Exception as e:
     logger.error(f"❌ OpenAI API 키 오류: {str(e)}")
     raise ValueError("OpenAI API 키가 유효하지 않거나 권한이 없습니다.")
@@ -195,11 +210,11 @@ def analyze_image():
                     ],
                     max_tokens=1000
                 )
-                
+
                 # GPT 응답 파싱
                 gpt_response = chat_response.choices[0].message.content
                 logger.info(f"GPT 응답: {gpt_response}")
-                
+
             except Exception as e:
                 logger.error(f"GPT-4 Vision API 호출 중 오류 발생: {str(e)}")
                 gpt_response = "이미지 분석 중 오류가 발생했습니다."
@@ -209,11 +224,11 @@ def analyze_image():
                 # 응답을 설명과 진단으로 분리
                 gpt_lines = gpt_response.split('\n')
                 gpt_description = gpt_lines[0] if len(gpt_lines) > 0 else ""
-                
+
                 # 진단 추출 (3개의 진단 찾기)
                 gpt_diagnoses = []
                 confidence_levels = [0.85, 0.75, 0.65]  # 더 현실적인 확률 분포
-                
+
                 for i, line in enumerate(gpt_lines[1:]):
                     if line.startswith(('1.', '2.', '3.')):
                         diagnosis = line.split('.', 1)[1].strip()
@@ -226,9 +241,9 @@ def analyze_image():
                             })
                         if len(gpt_diagnoses) >= 3:
                             break
-                            
+
                 logger.info(f"파싱된 GPT 진단 결과: {gpt_diagnoses}")
-                
+
             except Exception as e:
                 logger.error(f"GPT 응답 파싱 중 오류 발생: {str(e)}")
                 gpt_description = "응답 파싱 중 오류가 발생했습니다."
