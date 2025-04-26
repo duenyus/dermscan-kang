@@ -227,10 +227,6 @@ def analyze_image():
 
             # ChatGPT 응답 파싱
             try:
-                # GPT 응답 로깅
-                logger.info(f"GPT 응답: {gpt_response}")
-
-                # GPT 응답 파싱
                 sections = gpt_response.split('\n\n')
 
                 # 특징 추출
