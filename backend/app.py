@@ -194,14 +194,14 @@ def analyze_image():
                     messages=[
                         {
                             "role": "system",
-                            "content": "You are a dermatology AI assistant. Analyze skin lesion images and provide descriptions and potential diagnoses in Korean."
+                            "content": "You are a dermatology AI assistant. Analyze skin lesion images and provide detailed descriptions and potential diagnoses in Korean. Include visual characteristics, size estimates, and relevant medical implications."
                         },
                         {
                             "role": "user",
                             "content": [
                                 {
                                     "type": "text",
-                                    "text": "이 피부 병변을 분석해주세요. 다음 형식으로 답변해주세요:\n\n1. 특징: [100자 이내로 병변의 주요 특징 설명]\n\n2. 가능성 있는 진단:\n- [진단명 1]: [설명]\n- [진단명 2]: [설명]\n- [진단명 3]: [설명]"
+                                    "text": "이 피부 병변을 상세히 분석해주세요. 다음 형식으로 답변해주세요:\n\n1. 특징: [200자 이내로 병변의 형태, 색상, 크기, 경계, 표면 특성 등을 자세히 설명]\n\n2. 가능성 있는 진단:\n- [진단명 1] (가능성: 높음): [상세 설명]\n- [진단명 2] (가능성: 중간): [상세 설명]\n- [진단명 3] (가능성: 낮음): [상세 설명]"
                                 },
                                 {
                                     "type": "image_url",
