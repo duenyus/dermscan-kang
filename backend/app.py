@@ -184,74 +184,9 @@ def analyze_image():
             with open(file_path, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-            try:
-                # ChatGPT에 이미지 분석 요청
-                chat_response = client.chat.completions.create(
-                    model="gpt-4.5-preview-2025-02-27",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a dermatology AI assistant specialized in analyzing dermoscopic images. Analyze skin lesion images and provide detailed descriptions and potential diagnoses in Korean. Include visual characteristics, size estimates, and relevant medical implications."
-                        },
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "이 피부 병변의 dermoscopic image를 상세히 분석해주세요. 다음 형식으로 답변해주세요:\n\n1. 특징: [200자 이내로 병변의 형태, 색상, 크기, 경계, 표면 특성, dermoscopic 특징 등을 자세히 설명]\n\n2. 가능성 있는 진단:\n- [진단명 1] (가능성: 높음): [상세 설명]\n- [진단명 2] (가능성: 중간): [상세 설명]\n- [진단명 3] (가능성: 낮음): [상세 설명]"
-                                },
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": f"data:image/jpeg;base64,{base64_image}",
-                                        "detail": "high"
-                                    }
-                                }
-                            ]
-                        }
-                    ],
-                    max_tokens=2000,
-                    temperature=0.7
-                )
 
-                # GPT 응답 파싱
-                gpt_response = chat_response.choices[0].message.content
-                logger.info(f"GPT 응답: {gpt_response}")
-
-            except Exception as e:
-                logger.error(f"GPT-4 Vision API 호출 중 오류 발생: {str(e)}")
-                gpt_response = "이미지 분석 중 오류가 발생했습니다."
-
-            # GPT 응답 파싱 (수정된 부분)
-            try:
-                sections = gpt_response.split('\n\n')
-
-                # 특징 추출
-                gpt_description = ""
-                if sections[0].startswith('1. 특징:'):
-                    gpt_description = sections[0].split(':', 1)[1].strip()
-
-                # 진단 추출
-                gpt_diagnoses = []
-                if len(sections) > 1 and '가능성 있는 진단:' in sections[1]:
-                    diagnoses_text = sections[1].split('\n')[1:]  # Skip the header
-                    confidence_levels = [0.85, 0.75, 0.65]
-
-                    for i, line in enumerate(diagnoses_text):
-                        if line.startswith('-'):
-                            parts = line[1:].strip().split(':', 1)
-                            if len(parts) == 2:
-                                diagnosis, description = parts
-                                gpt_diagnoses.append({
-                                    "diagnosis": diagnosis.strip(),
-                                    "description": description.strip(),
-                                    "probability": confidence_levels[i] if i < len(confidence_levels) else 0.5
-                                })
-
-            except Exception as e:
-                logger.error(f"GPT 응답 파싱 중 오류 발생: {str(e)}")
-                gpt_description = "이미지 분석 중 오류가 발생했습니다."
-                gpt_diagnoses = []
+            gpt_description = description  # Use Swin model's description instead of GPT
+            gpt_diagnoses = diagnoses  # Use Swin model's diagnoses
 
 
             result = {
