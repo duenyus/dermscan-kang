@@ -190,7 +190,7 @@ def analyze_image():
             try:
                 # ChatGPT에 이미지 분석 요청
                 chat_response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4-1106-preview",
                     messages=[
                         {
                             "role": "user",
