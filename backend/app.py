@@ -229,7 +229,7 @@ def analyze_image():
             try:
                 # GPT 응답 파싱
                 sections = gpt_response.split('\n\n')
-                
+
                 # 특징 추출
                 gpt_description = ""
                 if sections[0].startswith('1. 특징:'):
@@ -240,7 +240,7 @@ def analyze_image():
                 if len(sections) > 1 and '가능성 있는 진단:' in sections[1]:
                     diagnoses_text = sections[1].split('\n')[1:]  # Skip the header
                     confidence_levels = [0.85, 0.75, 0.65]
-                    
+
                     for i, line in enumerate(diagnoses_text):
                         if line.startswith('-'):
                             parts = line[1:].strip().split(':', 1)

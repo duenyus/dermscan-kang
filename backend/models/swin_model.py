@@ -165,13 +165,18 @@ class SwinModel:
                 }
             }
 
-            # 기본 설명 선택 (기본값으로 양성 모반 사용)
-            description_info = descriptions_map.get(top_class_korean, descriptions_map["양성 모반(Benign Nevus)"])
+            # 상위 3개 진단 가져오기
+            top_3_idx = np.argsort(probabilities)[-3:][::-1]
+            top_3_probs = probabilities[top_3_idx]
+            top_3_classes = [self.id_to_korean[idx] for idx in top_3_idx]
+
+            # 가장 높은 확률의 진단으로 설명 생성
+            description_info = descriptions_map.get(top_3_classes[0], descriptions_map["양성 모반(Benign Nevus)"])
 
             # 신뢰도에 따른 문구 추가
             confidence_phrase = (
-                f"높은 신뢰도로 {top_class_korean}(으)로 추정됩니다. " if top_prob > 0.7 else
-                f"잠정적으로 {top_class_korean}(으)로 추정됩니다. "
+                f"높은 신뢰도로 {top_3_classes[0]}(으)로 추정됩니다. " if top_3_probs[0] > 0.7 else
+                f"잠정적으로 {top_3_classes[0]}(으)로 추정됩니다. "
             )
 
             # 최종 설명 구성
