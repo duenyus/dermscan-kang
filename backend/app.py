@@ -15,8 +15,14 @@ from openai import OpenAI
 from models.swin_model import SwinModel
 from models.vi_model import ViModel
 
+# OpenAI API 키를 환경 변수에서 가져오기
+from os import getenv
+OPENAI_API_KEY = getenv('OPENAI_API_KEY')
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
+
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
