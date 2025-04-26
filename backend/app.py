@@ -15,6 +15,10 @@ from openai import OpenAI
 from models.swin_model import SwinModel
 from models.vi_model import ViModel
 
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # OpenAI API 키를 환경 변수에서 가져오기
 from os import getenv
 OPENAI_API_KEY = getenv('OPENAI_API_KEY')
@@ -29,10 +33,6 @@ try:
 except Exception as e:
     logger.error(f"❌ OpenAI API 키 오류: {str(e)}")
     raise ValueError("OpenAI API 키가 유효하지 않거나 권한이 없습니다.")
-
-# 로깅 설정
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 # OpenAI API 키를 환경 변수에서 가져오기
 from os import getenv
