@@ -123,13 +123,24 @@ def analyze_image():
             if not model:
                 return jsonify({'error': 'No model available'}), 500
 
+            # 이미지 전처리 및 분석
+            model = models.get(default_model)
+            if not model:
+                return jsonify({'error': 'No model available'}), 500
+
+            # 이미지 전처리
+            inputs = model.preprocess_image(file_path)
+            if inputs is None:
+                return jsonify({'error': 'Image preprocessing failed'}), 500
+
+            # 진단 결과 및 설명 생성
+            diagnoses = model.predict(inputs)
+            description = model.generate_description(inputs)
+
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
-                'description': "피부 병변 분석 결과입니다.",
-                'diagnoses': [
-                    {"diagnosis": "Sample diagnosis 1", "probability": 0.8},
-                    {"diagnosis": "Sample diagnosis 2", "probability": 0.2}
-                ]
+                'description': description,
+                'diagnoses': diagnoses
             }
 
             return jsonify(result)
