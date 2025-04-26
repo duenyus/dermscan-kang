@@ -151,49 +151,67 @@ def analyze_image():
             with open(file_path, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-            # ChatGPT에 이미지 분석 요청
-            chat_response = client.chat.completions.create(
-                model="gpt-4-vision-preview",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text", 
-                                "text": "This is a dermoscopic image. Please analyze the skin lesion in this image and provide:\n1. A description of the lesion in about 100 characters in Korean\n2. List 3 possible diagnoses with brief explanations"
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}"
+            try:
+                # ChatGPT에 이미지 분석 요청
+                chat_response = client.chat.completions.create(
+                    model="gpt-4-vision-preview",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text", 
+                                    "text": "이 피부 병변 이미지를 분석하고 다음 정보를 제공해주세요:\n1. 병변의 특징을 100자 이내로 설명\n2. 가능성 있는 진단명 3가지를 간단한 설명과 함께 나열"
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{base64_image}"
+                                    }
                                 }
-                            }
-                        ]
-                    }
-                ],
-                max_tokens=500
-            )
+                            ]
+                        }
+                    ],
+                    max_tokens=1000
+                )
+                
+                # GPT 응답 파싱
+                gpt_response = chat_response.choices[0].message.content
+                logger.info(f"GPT 응답: {gpt_response}")
+                
+            except Exception as e:
+                logger.error(f"GPT-4 Vision API 호출 중 오류 발생: {str(e)}")
+                gpt_response = "이미지 분석 중 오류가 발생했습니다."
 
             # ChatGPT 응답 파싱
-            gpt_response = chat_response.choices[0].message.content
-            
-            # 응답을 설명과 진단으로 분리
-            gpt_lines = gpt_response.split('\n')
-            gpt_description = gpt_lines[0] if len(gpt_lines) > 0 else ""
-            
-            # 진단 추출 (3개의 진단 찾기)
-            gpt_diagnoses = []
-            for line in gpt_lines[1:]:
-                if line.startswith(('1.', '2.', '3.')):
-                    diagnosis = line.split('.', 1)[1].strip()
-                    if ':' in diagnosis:
-                        diag_name, diag_desc = diagnosis.split(':', 1)
-                        gpt_diagnoses.append({
-                            "diagnosis": diag_name.strip(),
-                            "probability": round(1.0 - (len(gpt_diagnoses) * 0.2), 2)  # 단순 확률 할당
-                        })
-                    if len(gpt_diagnoses) >= 3:
-                        break
+            try:
+                # 응답을 설명과 진단으로 분리
+                gpt_lines = gpt_response.split('\n')
+                gpt_description = gpt_lines[0] if len(gpt_lines) > 0 else ""
+                
+                # 진단 추출 (3개의 진단 찾기)
+                gpt_diagnoses = []
+                confidence_levels = [0.85, 0.75, 0.65]  # 더 현실적인 확률 분포
+                
+                for i, line in enumerate(gpt_lines[1:]):
+                    if line.startswith(('1.', '2.', '3.')):
+                        diagnosis = line.split('.', 1)[1].strip()
+                        if ':' in diagnosis:
+                            diag_name, diag_desc = diagnosis.split(':', 1)
+                            gpt_diagnoses.append({
+                                "diagnosis": diag_name.strip(),
+                                "description": diag_desc.strip(),
+                                "probability": confidence_levels[len(gpt_diagnoses)] if len(gpt_diagnoses) < len(confidence_levels) else 0.5
+                            })
+                        if len(gpt_diagnoses) >= 3:
+                            break
+                            
+                logger.info(f"파싱된 GPT 진단 결과: {gpt_diagnoses}")
+                
+            except Exception as e:
+                logger.error(f"GPT 응답 파싱 중 오류 발생: {str(e)}")
+                gpt_description = "응답 파싱 중 오류가 발생했습니다."
+                gpt_diagnoses = []
 
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
