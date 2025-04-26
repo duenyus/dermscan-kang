@@ -154,7 +154,7 @@ def analyze_image():
             try:
                 # ChatGPT에 이미지 분석 요청
                 chat_response = client.chat.completions.create(
-                    model="gpt-4-vision-preview-1106",
+                    model="gpt-4-vision-preview",
                     messages=[
                         {
                             "role": "user",
