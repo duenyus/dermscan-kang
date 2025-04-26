@@ -193,22 +193,28 @@ def analyze_image():
                     model="gpt-4.5-preview-2025-02-27",
                     messages=[
                         {
+                            "role": "system",
+                            "content": "You are a dermatology AI assistant. Analyze skin lesion images and provide descriptions and potential diagnoses in Korean."
+                        },
+                        {
                             "role": "user",
                             "content": [
                                 {
-                                    "type": "text", 
-                                    "text": "이 피부 병변 이미지를 분석하고 다음 정보를 제공해주세요:\n1. 병변의 특징을 100자 이내로 설명\n2. 가능성 있는 진단명 3가지를 간단한 설명과 함께 나열"
+                                    "type": "text",
+                                    "text": "이 피부 병변을 분석해주세요. 다음 형식으로 답변해주세요:\n\n1. 특징: [100자 이내로 병변의 주요 특징 설명]\n\n2. 가능성 있는 진단:\n- [진단명 1]: [설명]\n- [진단명 2]: [설명]\n- [진단명 3]: [설명]"
                                 },
                                 {
                                     "type": "image_url",
                                     "image_url": {
-                                        "url": f"data:image/jpeg;base64,{base64_image}"
+                                        "url": f"data:image/jpeg;base64,{base64_image}",
+                                        "detail": "high"
                                     }
                                 }
                             ]
                         }
                     ],
-                    max_tokens=1000
+                    max_tokens=2000,
+                    temperature=0.7
                 )
 
                 # GPT 응답 파싱
