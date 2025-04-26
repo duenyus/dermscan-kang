@@ -21,8 +21,14 @@ OPENAI_API_KEY = getenv('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
 
-# OpenAI 클라이언트 초기화
-client = OpenAI(api_key=OPENAI_API_KEY)
+# OpenAI API 키 유효성 검사
+try:
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    models = client.models.list()
+    logger.info("✅ OpenAI API 키가 유효합니다.")
+except Exception as e:
+    logger.error(f"❌ OpenAI API 키 오류: {str(e)}")
+    raise ValueError("OpenAI API 키가 유효하지 않거나 권한이 없습니다.")
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
