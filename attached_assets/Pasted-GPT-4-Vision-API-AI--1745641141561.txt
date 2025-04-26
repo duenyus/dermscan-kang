@@ -1,0 +1,106 @@
+GPT-4 Vision API를 통해 이미지를 분석하려는 시도에서 문제가 발생하셨다면, 올바른 요청 형식과 주의할 점을 정확히 이해하는 것이 중요합니다. 아래는 다른 AI 코딩 프로그램이나 개발자에게 이 과정을 설명하는 데 도움이 될 수 있는 안내문입니다.
+
+---
+
+## 🧠 GPT-4 Vision API를 통한 이미지 분석 요청 가이드
+
+OpenAI의 GPT-4 Vision API는 텍스트와 이미지를 함께 처리할 수 있는 멀티모달 모델입니다. 이미지를 분석하려면 다음과 같은 형식으로 API 요청을 구성해야 합니다.
+
+### ✅ 요청 구성 요소
+
+1. **모델 선택**: `gpt-4-vision-preview` 또는 최신 모델인 `gpt-4o`를 사용합니다.
+2. **엔드포인트**: `https://api.openai.com/v1/chat/completions`
+3. **헤더 설정**:
+   - `Authorization`: `Bearer YOUR_API_KEY`
+   - `Content-Type`: `application/json`
+4. **메시지 형식**:
+   - `messages` 필드는 배열이며, 각 요소는 `role`과 `content`를 포함합니다.
+   - `content`는 배열로, 텍스트와 이미지 정보를 포함할 수 있습니다. ([Gpt-4-vision code example for Base64 encoded images is missing](https://community.openai.com/t/gpt-4-vision-code-example-for-base64-encoded-images-is-missing/479929?utm_source=chatgpt.com))
+
+### 🖼️ 이미지 입력 방법
+
+이미지는 두 가지 방법으로 입력할 수 있습니다.
+
+#### 1. Base64 인코딩된 이미지 사용
+
+이미지를 Base64로 인코딩하고, `data:` URL 스킴을 사용하여 전달합니다.
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "data:image/jpeg;base64,BASE64_ENCODED_IMAGE_DATA"
+  }
+}
+```
+
+#### 2. 외부 이미지 URL 사용
+
+이미지가 공개적으로 접근 가능한 URL에 있을 경우, 해당 URL을 직접 사용할 수 있습니다.
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "https://example.com/path/to/image.jpg"
+  }
+}
+```
+
+> ⚠️ **주의**: 일부 경우, 외부 이미지 URL을 사용할 때 CORS 정책이나 인증 문제로 인해 접근이 제한될 수 있습니다. 이러한 경우, 이미지를 다운로드하여 Base64로 인코딩하는 방법을 고려하세요.
+
+### 🧪 전체 예시 요청
+
+아래는 Python을 사용하여 Base64 인코딩된 이미지를 GPT-4 Vision API에 전달하는 예시입니다.
+
+```python
+import openai
+import base64
+
+# API 키 설정
+openai.api_key = 'YOUR_API_KEY'
+
+# 이미지 파일을 Base64로 인코딩하는 함수
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+# 이미지 경로 설정
+image_path = "path/to/your/image.jpg"
+base64_image = encode_image(image_path)
+
+# API 요청
+response = openai.ChatCompletion.create(
+    model="gpt-4-vision-preview",  # 또는 "gpt-4o"
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "이 이미지를 분석해줘."},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=1000
+)
+
+# 응답 출력
+print(response['choices'][0]['message']['content'])
+```
+
+### 🛠️ 추가 팁
+
+- **`max_tokens`**: 응답의 최대 토큰 수를 지정합니다. 필요에 따라 조절하세요.
+- **이미지 크기 제한**: 이미지 파일 크기는 일반적으로 20MB 이하로 제한됩니다.
+- **에러 처리**: API 호출 시 발생할 수 있는 예외를 적절히 처리하여 안정적인 애플리케이션을 구성하세요.
+
+---
+
+이 가이드를 다른 개발자나 AI 코딩 도구에 전달하면, GPT-4 Vision API를 통해 이미지를 분석하는 데 필요한 정확한 요청 형식을 이해하고 구현하는 데 도움이 될 것입니다.
+
+추가적인 도움이 필요하시거나, 특정 오류 메시지에 대한 해결 방법이 궁금하시면 언제든지 문의해주세요. 
