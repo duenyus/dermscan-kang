@@ -165,16 +165,12 @@ def analyze_image():
 
         try:
             # 사용자가 선택한 모델 사용
-            selected_model = request.form.get('model', 'swin')
+            selected_model = request.form.get('model', default_model) # Use default if no model selected
             model = models.get(selected_model)
             if not model:
                 return jsonify({'error': 'Selected model not available'}), 500
 
             # 이미지 전처리 및 분석
-            model = models.get(selected_model)
-            if not model:
-                return jsonify({'error': 'No model available'}), 500
-
             # 이미지 전처리
             inputs = model.preprocess_image(file_path)
             if inputs is None:
@@ -226,7 +222,7 @@ def analyze_image():
                 logger.error(f"GPT-4 Vision API 호출 중 오류 발생: {str(e)}")
                 gpt_response = "이미지 분석 중 오류가 발생했습니다."
 
-            # ChatGPT 응답 파싱
+            # GPT 응답 파싱 (수정된 부분)
             try:
                 sections = gpt_response.split('\n\n')
 
@@ -257,12 +253,10 @@ def analyze_image():
                 gpt_description = "이미지 분석 중 오류가 발생했습니다."
                 gpt_diagnoses = []
 
-            # swin 모델 분석 결과를 description으로 설정
-            swin_description = description if description else "피부 병변 분석 결과를 불러오는 중입니다."
 
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
-                'description': swin_description,
+                'description': description,
                 'diagnoses': diagnoses,
                 'gpt_description': gpt_description,
                 'gpt_diagnoses': gpt_diagnoses
