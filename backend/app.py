@@ -254,12 +254,15 @@ def analyze_image():
 
             except Exception as e:
                 logger.error(f"GPT 응답 파싱 중 오류 발생: {str(e)}")
-                gpt_description = "응답 파싱 중 오류가 발생했습니다."
+                gpt_description = "이미지 분석 중 오류가 발생했습니다."
                 gpt_diagnoses = []
+
+            # swin 모델 분석 결과를 description으로 설정
+            swin_description = description if description else "피부 병변 분석 결과를 불러오는 중입니다."
 
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
-                'description': description,
+                'description': swin_description,
                 'diagnoses': diagnoses,
                 'gpt_description': gpt_description,
                 'gpt_diagnoses': gpt_diagnoses
