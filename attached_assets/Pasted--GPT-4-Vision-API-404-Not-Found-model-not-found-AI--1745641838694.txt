@@ -1,0 +1,103 @@
+아래는 **GPT-4 Vision API 호출 시 “404 Not Found / model_not_found” 오류**가 반복될 때, 외부 AI 코딩 도구(또는 동료 개발자)에게 전달하기 좋은 문제 원인·해결 가이드입니다. 첫머리의 핵심만 읽어도 바로 조치할 수 있도록 요약했고, 이어서 상세 단계·예시 코드를 제시합니다.
+
+---
+
+## 요약 (중요 포인트만)
+
+- **오류 원인**: `gpt-4-vision`처럼 현재 존재하지 않거나(또는 폐기된) 모델 ID를 호출했기 때문입니다. 이제 **비전 기능이 기본 내장된 최신 모델**은 `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`(Vision 포함) 등입니다.  ([How to use vision-enabled chat models - Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/gpt-with-vision?utm_source=chatgpt.com), [How can I access GPT-4, GPT-4o, and GPT-4o mini?](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4-gpt-4o-and-gpt-4o-mini?utm_source=chatgpt.com))  
+- **검증 방법**: `openai.models.list()` 로 귀하의 API 키가 실제로 접근 가능한 모델 목록을 확인하세요. 목록에 없어도 키 자체는 유효할 수 있습니다(단, Vision 권한·사용량 Tier가 부족하면 접근 불가).  ([Question about o1 Model Availability in the API](https://community.openai.com/t/question-about-o1-model-availability-in-the-api/1049757?utm_source=chatgpt.com), [How to move up in Usage Tiers - API - OpenAI Developer Community](https://community.openai.com/t/how-to-move-up-in-usage-tiers/677788?utm_source=chatgpt.com))  
+- **신규 모델로 교체**하고, **Base64 data URL** 또는 **공개 URL** 방식으로 이미지를 전달하면 정상 동작합니다.  ([Introducing 4o Image Generation - OpenAI](https://openai.com/index/introducing-4o-image-generation/?utm_source=chatgpt.com), [Hello GPT-4o - OpenAI](https://openai.com/index/hello-gpt-4o/?utm_source=chatgpt.com))  
+- **참고**: `gpt-4-vision-preview` 모델은 2024-06-06 공지 후 점진적으로 폐기 중입니다.  ([Deprecations - OpenAI API](https://platform.openai.com/docs/deprecations/base-gpt-models?utm_source=chatgpt.com), ['gpt-4-vision-preview' has been deprecated ? · Issue #30 - GitHub](https://github.com/tldraw/make-real-starter/issues/30?utm_source=chatgpt.com))  
+
+---
+
+## 1. 오류 원인 진단
+
+| 체크 항목 | 설명 |
+|-----------|------|
+| **모델 ID 오타·폐기 여부** | `gpt-4-vision`(존재 X) → `gpt-4o` 또는 `gpt-4o-mini` 로 변경 |
+| **사용량 Tier** | Vision 모델은 최소 **Tier 1** 이상 필요(결제·사용 실적 기반).  ([Open AI: Rate Limits and Usage Tiers. - OpenAI Platform](https://platform.openai.com/docs/guides/rate-limits/usage-tiers?utm_source=chatgpt.com), [Question about o1 Model Availability in the API](https://community.openai.com/t/question-about-o1-model-availability-in-the-api/1049757?utm_source=chatgpt.com)) |
+| **프로젝트 키** | `sk-proj-` 형식 키는 해당 **Project** 안에서만 모델 접근 권한이 설정됨. 다른 조직·프로젝트로 호출하면 404 발생 가능 |
+| **엔드포인트** | `POST https://api.openai.com/v1/chat/completions` 가 맞는지 재확인 |
+
+---
+
+## 2. 2025-04 기준 Vision 지원 모델 (API ID)
+
+| 모델 ID | 특징 | 비고 |
+|---------|------|------|
+| `gpt-4o` | 최상위 성능·멀티모달, 128 k context | 이미지·음성 모두 지원  ([Hello GPT-4o - OpenAI](https://openai.com/index/hello-gpt-4o/?utm_source=chatgpt.com)) |
+| `gpt-4o-mini` | 저비용·고속 경량 버전 | 동일 Vision 기능 탑재  ([How can I access GPT-4, GPT-4o, and GPT-4o mini?](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4-gpt-4o-and-gpt-4o-mini?utm_source=chatgpt.com)) |
+| `gpt-4-turbo` (2025-02) | 비용 효율, Vision 내장 | 일부 계정만 베타 단계  ([How to use vision-enabled chat models - Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/gpt-with-vision?utm_source=chatgpt.com)) |
+| `o1` / `o1-mini` | 연구용 미리보기 | Tier 제한 큼(4~5)  ([Will o1 vision work with tier 5? - API - OpenAI Developer Community](https://community.openai.com/t/will-o1-vision-work-with-tier-5/1075563?utm_source=chatgpt.com)) |
+
+> **중요:** 계정마다 사용 가능한 모델이 다릅니다. `openai.models.list()` 결과에 없는 모델 ID를 호출하면 동일한 404가 납니다.
+
+---
+
+## 3. 코드 예시 (Python)
+
+```python
+import openai, base64, logging
+
+openai.api_key = "YOUR_API_KEY"  # 환경 변수 권장
+
+def encode_b64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+img_b64 = encode_b64("sample.jpg")
+
+try:
+    completion = openai.ChatCompletion.create(
+        model="gpt-4o",            # ✅ 최신 Vision 모델
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "이 이미지를 설명해줘"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{img_b64}"
+                        }
+                    }
+                ]
+            }
+        ],
+        max_tokens=800
+    )
+    print(completion.choices[0].message.content)
+except openai.error.OpenAIError as e:
+    logging.error(f"API 호출 실패: {e}")
+```
+
+- **Base64 대신 공개 URL**도 가능:
+  ```json
+  { "type":"image_url","image_url":{"url":"https://example.com/cat.jpg"} }
+  ```
+
+---
+
+## 4. 추가 문제-해결 체크리스트
+
+1. **모델 목록 먼저 출력해보기**
+   ```python
+   for m in openai.Model.list().data:
+       print(m.id)
+   ```
+2. **Vision 기능 활성화 여부**: 대시보드 → *Settings > Beta features* 에서 *Vision* 토글 On 확인.  ([Has GPT-4 Vision Preview been replaced or removed? Getting ...](https://community.openai.com/t/has-gpt-4-vision-preview-been-replaced-or-removed-getting-model-not-found-error/1151485?utm_source=chatgpt.com))  
+3. **요금제 확인**: Vision 토큰 단가는 GPT-4o 기준 *입력 $10/1M*, *출력 $40/1M* 입니다.  ([API Pricing - OpenAI](https://openai.com/api/pricing/?utm_source=chatgpt.com))  
+4. **키 보안**: 클라이언트 코드·공개 Repo 에 API 키를 그대로 넣지 마십시오(환경 변수 사용).  
+5. **모델 폐기 일정 모니터링**: Deprecations 페이지 주기적 확인.  ([Deprecations - OpenAI API](https://platform.openai.com/docs/deprecations/base-gpt-models?utm_source=chatgpt.com))  
+
+---
+
+## 5. 요약 정리
+
+- **404 오류는 대부분 모델 ID 문제**입니다. `gpt-4o` 계열로 변경 후, 키 권한·Tier 조건을 충족하면 정상 호출됩니다.  
+- 폐기된 `gpt-4-vision-preview` 대신 **신규 멀티모달 모델**을 사용하세요.  
+- 실제 접근 가능 모델은 **`openai.models.list()`** 로 즉시 확인하는 것이 가장 빠릅니다.  
+- 키가 맞더라도 **사용량 Tier 미달**이면 Vision 모델이 숨겨집니다. 대시보드에서 Tier 1 이상인지 확인하세요.  
+
+위 가이드를 AI 코딩 도구나 협업 문서에 그대로 전달하면, 동일 문제를 겪는 개발자도 신속히 원인을 파악하고 해결하실 수 있습니다. 도움이 더 필요하시면 언제든 알려주세요!
