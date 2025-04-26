@@ -10,9 +10,13 @@ import logging
 import re
 import sqlite3
 from datetime import datetime
-
+import base64
+from openai import OpenAI
 from models.swin_model import SwinModel
 from models.vi_model import ViModel
+
+# OpenAI 클라이언트 초기화
+client = OpenAI(api_key="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")
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -137,10 +141,60 @@ def analyze_image():
             diagnoses = model.predict(inputs)
             description = model.generate_description(inputs)
 
+            # 이미지를 base64로 인코딩
+            with open(file_path, "rb") as image_file:
+                base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+            # ChatGPT에 이미지 분석 요청
+            chat_response = client.chat.completions.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text", 
+                                "text": "This is a dermoscopic image. Please analyze the skin lesion in this image and provide:\n1. A description of the lesion in about 100 characters in Korean\n2. List 3 possible diagnoses with brief explanations"
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=500
+            )
+
+            # ChatGPT 응답 파싱
+            gpt_response = chat_response.choices[0].message.content
+            
+            # 응답을 설명과 진단으로 분리
+            gpt_lines = gpt_response.split('\n')
+            gpt_description = gpt_lines[0] if len(gpt_lines) > 0 else ""
+            
+            # 진단 추출 (3개의 진단 찾기)
+            gpt_diagnoses = []
+            for line in gpt_lines[1:]:
+                if line.startswith(('1.', '2.', '3.')):
+                    diagnosis = line.split('.', 1)[1].strip()
+                    if ':' in diagnosis:
+                        diag_name, diag_desc = diagnosis.split(':', 1)
+                        gpt_diagnoses.append({
+                            "diagnosis": diag_name.strip(),
+                            "probability": round(1.0 - (len(gpt_diagnoses) * 0.2), 2)  # 단순 확률 할당
+                        })
+                    if len(gpt_diagnoses) >= 3:
+                        break
+
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
                 'description': description,
-                'diagnoses': diagnoses
+                'diagnoses': diagnoses,
+                'gpt_description': gpt_description,
+                'gpt_diagnoses': gpt_diagnoses
             }
 
             return jsonify(result)

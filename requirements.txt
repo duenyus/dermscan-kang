@@ -10,3 +10,4 @@ numpy
 pillow
 tensorflow
 werkzeug
+openai
