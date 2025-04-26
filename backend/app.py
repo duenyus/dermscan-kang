@@ -227,6 +227,9 @@ def analyze_image():
 
             # ChatGPT 응답 파싱
             try:
+                # GPT 응답 로깅
+                logger.info(f"GPT 응답: {gpt_response}")
+
                 # GPT 응답 파싱
                 sections = gpt_response.split('\n\n')
 
@@ -251,8 +254,6 @@ def analyze_image():
                                     "description": description.strip(),
                                     "probability": confidence_levels[i] if i < len(confidence_levels) else 0.5
                                 })
-
-                logger.info(f"파싱된 GPT 진단 결과: {gpt_diagnoses}")
 
             except Exception as e:
                 logger.error(f"GPT 응답 파싱 중 오류 발생: {str(e)}")
