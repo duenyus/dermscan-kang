@@ -171,7 +171,6 @@ def analyze_image():
                 return jsonify({'error': 'Selected model not available'}), 500
 
             # 이미지 전처리 및 분석
-            # 이미지 전처리
             inputs = model.preprocess_image(file_path)
             if inputs is None:
                 return jsonify({'error': 'Image preprocessing failed'}), 500
@@ -184,12 +183,14 @@ def analyze_image():
             with open(file_path, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-            # 모델의 진단 결과와 설명을 직접 사용
+            # 결과 구성
             result = {
                 'image_url': url_for('serve_image', filename=unique_filename, _external=True),
                 'description': description,
                 'diagnoses': diagnoses,
-                'model_used': selected_model
+                'model_used': selected_model,
+                'gpt_description': None,  # ChatGPT 설명
+                'gpt_diagnoses': []  # ChatGPT 진단
             }
 
             return jsonify(result)
